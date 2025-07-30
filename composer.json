@@ -1,0 +1,72 @@
+{
+    "name": "sebastiansulinski/laravel-bits",
+    "type": "project",
+    "description": "A set of handy utilities for any Laravel project.",
+    "require": {
+        "php": "^8.4",
+        "laravel/framework": "^12.0",
+        "spatie/laravel-data": "^4.17"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^10.4",
+        "laravel/pint": "^1.24",
+        "pestphp/pest": "^3.7",
+        "phpstan/phpstan": "^2.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "LaravelBits\\": "src"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LaravelBits\\Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/",
+            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
+        }
+    },
+    "scripts": {
+        "copy-git-hooks": [
+            "@php -r \"is_dir('.git') && copy('./scripts/git/hooks/pre-commit', '.git/hooks/pre-commit');\"",
+            "if [ -d .git ]; then chmod +x .git/hooks/pre-commit; else echo 'Git hooks directory or file does not exist.'; fi",
+            "@php -r \"is_dir('.git') && copy('./scripts/git/hooks/prepare-commit-msg', '.git/hooks/prepare-commit-msg');\"",
+            "if [ -d .git ]; then chmod +x .git/hooks/prepare-commit-msg; else echo 'Git hooks directory or file does not exist.'; fi"
+        ],
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare",
+            "@composer run copy-git-hooks"
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve --ansi"
+        ],
+        "lint": [
+            "@php vendor/bin/phpstan analyse --verbose --ansi"
+        ],
+        "test": [
+            "@clear",
+            "@php vendor/bin/pest"
+        ]
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "LaravelBits\\Providers\\LaravelBitsServiceProvider"
+            ]
+        }
+    }
+}
