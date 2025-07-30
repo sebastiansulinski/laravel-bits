@@ -2,6 +2,7 @@
     "name": "sebastiansulinski/laravel-bits",
     "type": "project",
     "description": "A set of handy utilities for any Laravel project.",
+    "license": "MIT",
     "require": {
         "php": "^8.4",
         "laravel/framework": "^12.0",

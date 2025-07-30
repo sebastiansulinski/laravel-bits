@@ -1,7 +1,7 @@
 <?php
 
-use LaravelBits\Traits\EnhancedEnums;
 use Illuminate\Support\Collection;
+use LaravelBits\Traits\EnhancedEnums;
 
 enum Status: string
 {

@@ -1,9 +1,9 @@
 <?php
 
-use LaravelBits\Traits\Sortable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
+use LaravelBits\Traits\Sortable;
 
 beforeEach(function () {
     Schema::create('films', function ($table) {

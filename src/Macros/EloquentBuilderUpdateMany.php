@@ -13,10 +13,9 @@ class EloquentBuilderUpdateMany
      */
     public function register(): void
     {
-        Builder::macro('updateMany', function (string $caseColumn, string $setColumn,  array $data, string|Carbon|null $timestamp = null) {
+        Builder::macro('updateMany', function (string $caseColumn, string $setColumn, array $data, string|Carbon|null $timestamp = null) {
 
             /** @var Builder $this */
-
             $timestamp ??= Carbon::now();
             $timestamp = $timestamp instanceof Carbon
                 ? $timestamp
@@ -33,20 +32,20 @@ class EloquentBuilderUpdateMany
                 $ids[] = $id;
             }
 
-            return DB::update(vsprintf("
+            return DB::update(vsprintf('
                 UPDATE %s 
                 SET %s = CASE %s %s END, 
                     `updated_at` = ?
-                WHERE %s IN (%s)",
-                    [
-                        $this->getModel()->getTable(),
-                        $setColumn,
-                        $caseColumn,
-                        implode(' ', $cases),
-                        $caseColumn,
-                        implode(',', array_fill(1, count($ids), '?'))
-                    ]
-                ), array_merge($bindings, [$timestamp], $ids));
+                WHERE %s IN (%s)',
+                [
+                    $this->getModel()->getTable(),
+                    $setColumn,
+                    $caseColumn,
+                    implode(' ', $cases),
+                    $caseColumn,
+                    implode(',', array_fill(1, count($ids), '?')),
+                ]
+            ), array_merge($bindings, [$timestamp], $ids));
         });
     }
 }
