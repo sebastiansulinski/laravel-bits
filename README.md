@@ -21,7 +21,8 @@ The package will automatically register its service provider.
 
 ### EnhancedEnums
 
-The `EnhancedEnums` trait provides additional utility methods for PHP enums, making them more convenient to work with in Laravel applications.
+The `EnhancedEnums` trait provides additional utility methods for PHP enums, making them more convenient to work with in
+Laravel applications.
 
 #### Usage
 
@@ -185,33 +186,40 @@ DB::table('orders')
 
 ### EloquentBuilder updateMany
 
-Adds an `updateMany` method to Laravel's Eloquent Builder for efficiently updating multiple records with different values in a single query.
+Adds an `updateMany` method to Laravel's Eloquent Builder for efficiently updating multiple records with different
+values in a single query.
 
 #### Usage
 
 ```php
 use App\Models\Book;
+use LaravelBits\Data\UpdateManySet;
 
 // Update multiple records with different sort values
-Book::updateMany('id', 'sort', [
+Book::updateMany('id', new UpdateManySet('sort', [
     1 => 30,
     2 => 20,
     3 => 10,
+]));
+
+// Update multiple columns at once
+Book::updateMany('id', [
+    new UpdateManySet('sort', [1 => 30, 2 => 20, 3 => 10]),
+    new UpdateManySet('priority', [1 => 'high', 2 => 'medium', 3 => 'low']),
 ]);
 
 // With custom timestamp
-Book::updateMany('id', 'priority', [
-    1 => 'high',
-    2 => 'medium',
-    3 => 'low',
-], now()->addHour());
+Book::updateMany('id', new UpdateManySet('sort', [
+    1 => 30,
+    2 => 20,
+    3 => 10,
+]), now()->addHour());
 ```
 
 #### Parameters
 
 - **`$caseColumn`** - The column to match against (usually 'id')
-- **`$setColumn`** - The column to update
-- **`$data`** - Array of key-value pairs `[id => new_value]`
+- **`$sets`** - UpdateManySet instance or array of UpdateManySet instances
 - **`$timestamp`** - Optional timestamp for updated_at (defaults to now())
 
 #### Benefits
@@ -222,7 +230,7 @@ Book::updateMany('id', 'priority', [
 
 ## License
 
-This package is open-sourced software licensed under the [MIT license](LICENSE.md).
+This package is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
 ## Contributing
 
