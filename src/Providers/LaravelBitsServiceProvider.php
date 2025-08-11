@@ -4,14 +4,18 @@ namespace LaravelBits\Providers;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
+use LaravelBits\Macros\ArrKeysToCamel;
+use LaravelBits\Macros\ArrKeysToSnake;
 use LaravelBits\Macros\EloquentBuilderUpdateMany;
 use LaravelBits\Macros\QueryBuilderWhereDateBetween;
 
 class LaravelBitsServiceProvider extends ServiceProvider
 {
     protected array $macros = [
-        QueryBuilderWhereDateBetween::class,
+        ArrKeysToCamel::class,
+        ArrKeysToSnake::class,
         EloquentBuilderUpdateMany::class,
+        QueryBuilderWhereDateBetween::class,
     ];
 
     /**
