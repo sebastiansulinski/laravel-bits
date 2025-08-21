@@ -134,6 +134,13 @@ use LaravelBits\Traits\Sortable;
 class MySortableService
 {
     use Sortable;
+    
+    public function sort(array $ids): void
+    {
+        MyModel::upsert(
+            $this->sortablePayload($ids), 'ulid', ['sort']
+        );
+    }
 
     protected function existingSortables(array $ids): Collection
     {
@@ -146,6 +153,10 @@ class MySortableService
     }
 }
 ```
+
+### Sorter
+
+Another way to handle sorting of the records is to use the `Sorter` class.
 
 #### Available Methods
 
