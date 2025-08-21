@@ -134,6 +134,13 @@ use LaravelBits\Traits\Sortable;
 class MySortableService
 {
     use Sortable;
+    
+    public function sort(array $ids): void
+    {
+        MyModel::upsert(
+            $this->sortablePayload($ids), 'ulid', ['sort']
+        );
+    }
 
     protected function existingSortables(array $ids): Collection
     {
@@ -147,13 +154,112 @@ class MySortableService
 }
 ```
 
-#### Available Methods
+### Sorter
 
-- **`sortablePayload(array $ids, string $column = 'ulid'): array`** - Generate payload for sorting records
-- **`existingSortables(array $ids): Collection`** - Abstract method to get existing records
-- **`sortableRange(array $ids, $startSort): array`** - Generate range of sort positions
-- **`modelToArray(Model $model): array`** - Convert model to array using specific columns
-- **`sortableModelColumns(): array`** - Abstract method to define which columns to include
+The `Sorter` and `SorterPayload` classes provide a powerful way to reorder records based on a new sequence of IDs while
+maintaining proper sort values. This is particularly useful for drag-and-drop interfaces or any scenario where you need
+to update the sort order of multiple records efficiently.
+
+#### SorterPayload
+
+The `SorterPayload` class prepares a collection of models in the desired order based on an array of IDs.
+
+**Constructor Parameters:**
+
+- **`$models`** - Collection of Eloquent models to be reordered
+- **`$ids`** - Array of IDs in the desired order
+- **`$filter`** - String column name or Closure to match models with IDs (defaults to 'id')
+
+#### Sorter
+
+The `Sorter` class generates update sets for bulk database operations based on the reordered payload.
+
+**Constructor Parameters:**
+
+- **`$payload`** - SorterPayload instance with reordered records
+- **`$idColumn`** - Column name used as the primary key (defaults to 'id'). When used in combination with Eloquent
+  `Builder::updateMany()`, this should match the first argument `$caseColumn`.
+- **`$sortColumn`** - Column name used for sorting (defaults to 'sort')
+- **`$updateColumn`** - Column name to update (defaults to 'sort')
+
+**Methods:**
+
+- **`getSet(?Closure $callback = null): UpdateManySet`** - Generate an UpdateManySet for bulk updates
+
+#### Usage Examples
+
+**Basic Sorting:**
+
+```php
+use LaravelBits\Utilities\Sorter\Sorter;
+use LaravelBits\Utilities\Sorter\SorterPayload;
+
+// Get your models
+$models = Book::where('category_id', 1)->get();
+
+// Define the new order using IDs
+$newOrder = [3, 1, 4, 2, 5]; // Book IDs in desired order
+
+// Create the payload
+$payload = new SorterPayload(
+    models: $models,
+    ids: $newOrder,
+    filter: 'id' // Match by 'id' column
+);
+
+// Create the sorter
+$sorter = new Sorter(payload: $payload);
+
+// Get the update set and apply it
+$updateSet = $sorter->getSet();
+Book::updateMany('id', $updateSet);
+```
+
+**Advanced Sorting with Custom Columns:**
+
+```php
+// Using ULID as identifier and custom sort column
+$models = Product::where('active', true)->get();
+$ulidOrder = ['01H123...', '01H456...', '01H789...']; // ULIDs in desired order
+
+$payload = new SorterPayload(
+    models: $models,
+    ids: $ulidOrder,
+    filter: fn($model, $ulid) => $model->ulid->toString() === $ulid
+);
+
+$sorter = new Sorter(
+    payload: $payload,
+    idColumn: 'id',
+    sortColumn: 'position',
+    updateColumn: 'position'
+);
+
+$updateSet = $sorter->getSet();
+Product::updateMany('id', $updateSet);
+```
+
+**Custom Value Generation:**
+
+```php
+// Generate custom values with a callback
+$sorter = new Sorter(
+    payload: $payload,
+    updateColumn: 'display_name'
+);
+
+$updateSet = $sorter->getSet(
+    fn($model, $index, $sort) => "Item #{$index} (Sort: {$sort})"
+);
+
+Product::updateMany('id', $updateSet);
+```
+
+The callback function receives three parameters:
+
+- **`$model`** - The current Eloquent model
+- **`$index`** - Zero-based index in the reordered sequence
+- **`$sort`** - The calculated sort value for this position
 
 ## Available Macros
 
