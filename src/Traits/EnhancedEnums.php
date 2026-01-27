@@ -3,6 +3,7 @@
 namespace LaravelBits\Traits;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 trait EnhancedEnums
 {
@@ -49,7 +50,7 @@ trait EnhancedEnums
      */
     public function label(): string
     {
-        return $this->name;
+        return Str::headline($this->name);
     }
 
     /**
