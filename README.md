@@ -290,6 +290,46 @@ DB::table('orders')
 - **`$dates`** - Array with two dates `[start_date, end_date]`
 - **`$boolean`** - Boolean operator ('and' or 'or'), defaults to 'and'
 
+### QueryBuilder whereLower
+
+Adds a `whereLower` method to Laravel's Query Builder for comparing a column against a lowercased value. Works with
+both Query Builder and Eloquent Builder. Accepts the same arguments as the `where` method.
+
+#### Usage
+
+```php
+use Illuminate\Support\Facades\DB;
+
+// Simple equality check - lowercases the value automatically
+DB::table('users')
+    ->whereLower('email', 'John@Example.COM')
+    ->get();
+// Equivalent to: ->where('email', 'john@example.com')
+
+// With Eloquent
+User::query()
+    ->whereLower('email', $request->email)
+    ->first();
+
+// With a custom operator
+User::query()
+    ->whereLower('email', '!=', 'ADMIN@EXAMPLE.COM')
+    ->get();
+
+// With boolean operator
+User::query()
+    ->where('name', 'John')
+    ->whereLower('email', '=', 'JANE@EXAMPLE.COM', 'or')
+    ->get();
+```
+
+#### Parameters
+
+- **`$column`** - The column name to filter
+- **`$operator`** - Comparison operator (defaults to '=') or the value when using 2-argument form
+- **`$value`** - The value to lowercase and compare against
+- **`$boolean`** - Boolean operator ('and' or 'or'), defaults to 'and'
+
 ### EloquentBuilder updateMany
 
 Adds an `updateMany` method to Laravel's Eloquent Builder for efficiently updating multiple records with different
