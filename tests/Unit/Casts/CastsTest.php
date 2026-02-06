@@ -156,3 +156,49 @@ it('lowercases mixed case value in lowercase cast', function () {
 
     expect($instance->email)->toBe('john.doe@example.com');
 });
+
+it('lowercases unicode characters in lowercase cast', function () {
+
+    $model = new class extends Model
+    {
+        protected $fillable = ['name'];
+
+        protected function casts(): array
+        {
+            return [
+                'name' => Lowercase::class,
+            ];
+        }
+    };
+
+    $instance = new $model(['name' => 'ÜBERMÜTIG']);
+
+    expect($instance->getAttributes()['name'])->toBe('übermütig');
+
+    $instance->setRawAttributes(['name' => 'ÉLÉPHANT']);
+
+    expect($instance->name)->toBe('éléphant');
+});
+
+it('lowercases mixed ascii and unicode characters in lowercase cast', function () {
+
+    $model = new class extends Model
+    {
+        protected $fillable = ['name'];
+
+        protected function casts(): array
+        {
+            return [
+                'name' => Lowercase::class,
+            ];
+        }
+    };
+
+    $instance = new $model(['name' => 'José GARCÍA']);
+
+    expect($instance->getAttributes()['name'])->toBe('josé garcía');
+
+    $instance->setRawAttributes(['name' => 'MÜNCHEN City']);
+
+    expect($instance->name)->toBe('münchen city');
+});

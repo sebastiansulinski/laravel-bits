@@ -93,3 +93,29 @@ it('supports the boolean argument', function () {
     expect($results)->toHaveCount(2)
         ->and($results->pluck('name')->all())->toBe(['John', 'Jane']);
 });
+
+it('lowercases unicode characters', function () {
+    DB::table('where_lowercase')->insert([
+        ['email' => 'müller@example.com', 'name' => 'Müller'],
+    ]);
+
+    $results = DB::table('where_lowercase')
+        ->whereLowercase('email', 'MÜLLER@EXAMPLE.COM')
+        ->get();
+
+    expect($results)->toHaveCount(1)
+        ->and($results->first()->name)->toBe('Müller');
+});
+
+it('lowercases mixed ascii and unicode characters', function () {
+    DB::table('where_lowercase')->insert([
+        ['email' => 'josé@example.com', 'name' => 'José'],
+    ]);
+
+    $results = WhereLowercase::query()
+        ->whereLowercase('email', 'JOSÉ@EXAMPLE.COM')
+        ->get();
+
+    expect($results)->toHaveCount(1)
+        ->and($results->first()->name)->toBe('José');
+});
