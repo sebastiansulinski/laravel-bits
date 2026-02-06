@@ -4,14 +4,14 @@ namespace LaravelBits\Macros;
 
 use Illuminate\Database\Query\Builder;
 
-class QueryBuilderWhereLower
+class QueryBuilderWhereLowercase
 {
     /**
      * Handle request.
      */
     public function register(): void
     {
-        Builder::macro('whereLower',
+        Builder::macro('whereLowercase',
             function (string $column, mixed $operator = null, mixed $value = null, string $boolean = 'and') {
                 /** @var Builder $this */
                 [$value, $operator] = $this->prepareValueAndOperator(

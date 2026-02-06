@@ -5,6 +5,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use LaravelBits\Casts\AsBoolean;
 use LaravelBits\Casts\AsUlid;
+use LaravelBits\Casts\Lowercase;
 use Symfony\Component\Uid\Ulid;
 
 uses(RefreshDatabase::class);
@@ -45,4 +46,113 @@ it('correctly casts to boolean', function () {
         ->toBe(true)
         ->and(new $model(['is_active' => ''])->is_active)
         ->toBe(false);
+});
+
+it('lowercases value when getting', function () {
+
+    $model = new class extends Model
+    {
+        protected $fillable = ['email'];
+
+        protected function casts(): array
+        {
+            return [
+                'email' => Lowercase::class,
+            ];
+        }
+    };
+
+    $instance = new $model;
+    $instance->setRawAttributes(['email' => 'JOHN@EXAMPLE.COM']);
+
+    expect($instance->email)->toBe('john@example.com');
+});
+
+it('lowercases value when setting', function () {
+
+    $model = new class extends Model
+    {
+        protected $fillable = ['email'];
+
+        protected function casts(): array
+        {
+            return [
+                'email' => Lowercase::class,
+            ];
+        }
+    };
+
+    $instance = new $model(['email' => 'JOHN@EXAMPLE.COM']);
+
+    expect($instance->getAttributes()['email'])->toBe('john@example.com');
+});
+
+it('handles null value in lowercase cast', function () {
+
+    $model = new class extends Model
+    {
+        protected $fillable = ['email'];
+
+        protected function casts(): array
+        {
+            return [
+                'email' => Lowercase::class,
+            ];
+        }
+    };
+
+    $instance = new $model;
+    $instance->setRawAttributes(['email' => null]);
+
+    expect($instance->email)->toBeNull();
+
+    $instance2 = new $model(['email' => null]);
+
+    expect($instance2->getAttributes()['email'])->toBeNull();
+});
+
+it('handles already lowercase value in lowercase cast', function () {
+
+    $model = new class extends Model
+    {
+        protected $fillable = ['email'];
+
+        protected function casts(): array
+        {
+            return [
+                'email' => Lowercase::class,
+            ];
+        }
+    };
+
+    $instance = new $model(['email' => 'john@example.com']);
+
+    expect($instance->getAttributes()['email'])->toBe('john@example.com');
+
+    $instance->setRawAttributes(['email' => 'john@example.com']);
+
+    expect($instance->email)->toBe('john@example.com');
+});
+
+it('lowercases mixed case value in lowercase cast', function () {
+
+    $model = new class extends Model
+    {
+        protected $fillable = ['email'];
+
+        protected function casts(): array
+        {
+            return [
+                'email' => Lowercase::class,
+            ];
+        }
+    };
+
+    $instance = new $model(['email' => 'John.Doe@Example.COM']);
+
+    expect($instance->getAttributes()['email'])->toBe('john.doe@example.com');
+
+    $instance->setRawAttributes(['email' => 'John.Doe@Example.COM']);
+
+    expect($instance->email)->toBe('john.doe@example.com');
 });

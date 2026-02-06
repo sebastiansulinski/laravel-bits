@@ -290,9 +290,9 @@ DB::table('orders')
 - **`$dates`** - Array with two dates `[start_date, end_date]`
 - **`$boolean`** - Boolean operator ('and' or 'or'), defaults to 'and'
 
-### QueryBuilder whereLower
+### QueryBuilder whereLowercase
 
-Adds a `whereLower` method to Laravel's Query Builder for comparing a column against a lowercased value. Works with
+Adds a `whereLowercase` method to Laravel's Query Builder for comparing a column against a lowercased value. Works with
 both Query Builder and Eloquent Builder. Accepts the same arguments as the `where` method.
 
 #### Usage
@@ -302,24 +302,24 @@ use Illuminate\Support\Facades\DB;
 
 // Simple equality check - lowercases the value automatically
 DB::table('users')
-    ->whereLower('email', 'John@Example.COM')
+    ->whereLowercase('email', 'John@Example.COM')
     ->get();
 // Equivalent to: ->where('email', 'john@example.com')
 
 // With Eloquent
 User::query()
-    ->whereLower('email', $request->email)
+    ->whereLowercase('email', $request->email)
     ->first();
 
 // With a custom operator
 User::query()
-    ->whereLower('email', '!=', 'ADMIN@EXAMPLE.COM')
+    ->whereLowercase('email', '!=', 'ADMIN@EXAMPLE.COM')
     ->get();
 
 // With boolean operator
 User::query()
     ->where('name', 'John')
-    ->whereLower('email', '=', 'JANE@EXAMPLE.COM', 'or')
+    ->whereLowercase('email', '=', 'JANE@EXAMPLE.COM', 'or')
     ->get();
 ```
 
@@ -373,6 +373,43 @@ Book::updateMany('id', new UpdateManySet('sort', [
 - **Performance**: Updates multiple records in a single SQL query using CASE statements
 - **Efficiency**: Avoids N+1 query problems when updating many records
 - **Automatic timestamps**: Automatically updates the `updated_at` column
+
+## Available Casts
+
+### Lowercase
+
+The `Lowercase` cast automatically converts string values to lowercase when getting and setting model attributes. This is useful for normalizing data like email addresses.
+
+#### Usage
+
+```php
+use Illuminate\Database\Eloquent\Model;
+use LaravelBits\Casts\Lowercase;
+
+class User extends Model
+{
+    protected function casts(): array
+    {
+        return [
+            'email' => Lowercase::class,
+        ];
+    }
+}
+```
+
+#### Examples
+
+```php
+$user = new User(['email' => 'JOHN@EXAMPLE.COM']);
+$user->email; // 'john@example.com'
+
+$user->email = 'Jane@Example.COM';
+$user->email; // 'jane@example.com'
+
+// Null values are preserved
+$user->email = null;
+$user->email; // null
+```
 
 ## License
 

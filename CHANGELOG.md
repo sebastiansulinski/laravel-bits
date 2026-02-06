@@ -8,8 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0] - 2026-02-05
 
 ### Added
-- `whereLower` query builder macro for comparing a column against a lowercased value with full `where()` signature support (operator, value, boolean)
-- Documentation for `whereLower` macro in README
+- `whereLowercase` query builder macro for comparing a column against a lowercased value with full `where()` signature support (operator, value, boolean)
+- `Lowercase` Eloquent cast for automatically converting string attributes to lowercase on get and set
+- Documentation for `whereLowercase` macro and `Lowercase` cast in README
+
+### Changed
+- Renamed `whereLower` macro to `whereLowercase` for clarity
+- Renamed `QueryBuilderWhereLower` class to `QueryBuilderWhereLowercase`
 
 ## [1.1.1] - 2026-01-27
 

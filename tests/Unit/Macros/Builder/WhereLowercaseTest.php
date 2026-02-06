@@ -5,21 +5,21 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class WhereLower extends Model
+class WhereLowercase extends Model
 {
-    protected $table = 'where_lower';
+    protected $table = 'where_lowercase';
 
     public $timestamps = false;
 }
 
 beforeEach(function () {
-    Schema::create('where_lower', function (Blueprint $table) {
+    Schema::create('where_lowercase', function (Blueprint $table) {
         $table->id();
         $table->string('email');
         $table->string('name');
     });
 
-    DB::table('where_lower')->insert([
+    DB::table('where_lowercase')->insert([
         ['email' => 'john@example.com', 'name' => 'John'],
         ['email' => 'jane@example.com', 'name' => 'Jane'],
         ['email' => 'admin@example.com', 'name' => 'Admin'],
@@ -27,12 +27,12 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-    Schema::drop('where_lower');
+    Schema::drop('where_lowercase');
 });
 
 it('filters by lowercased value via query builder', function () {
-    $results = DB::table('where_lower')
-        ->whereLower('email', 'JOHN@EXAMPLE.COM')
+    $results = DB::table('where_lowercase')
+        ->whereLowercase('email', 'JOHN@EXAMPLE.COM')
         ->get();
 
     expect($results)->toHaveCount(1)
@@ -40,8 +40,8 @@ it('filters by lowercased value via query builder', function () {
 });
 
 it('filters by lowercased value via eloquent builder', function () {
-    $results = WhereLower::query()
-        ->whereLower('email', 'JANE@EXAMPLE.COM')
+    $results = WhereLowercase::query()
+        ->whereLowercase('email', 'JANE@EXAMPLE.COM')
         ->get();
 
     expect($results)->toHaveCount(1)
@@ -49,16 +49,16 @@ it('filters by lowercased value via eloquent builder', function () {
 });
 
 it('returns no results when lowercased value does not match', function () {
-    $results = DB::table('where_lower')
-        ->whereLower('email', 'NONEXISTENT@EXAMPLE.COM')
+    $results = DB::table('where_lowercase')
+        ->whereLowercase('email', 'NONEXISTENT@EXAMPLE.COM')
         ->get();
 
     expect($results)->toHaveCount(0);
 });
 
 it('handles already lowercase input', function () {
-    $results = WhereLower::query()
-        ->whereLower('email', 'admin@example.com')
+    $results = WhereLowercase::query()
+        ->whereLowercase('email', 'admin@example.com')
         ->get();
 
     expect($results)->toHaveCount(1)
@@ -66,8 +66,8 @@ it('handles already lowercase input', function () {
 });
 
 it('can be chained with other where clauses', function () {
-    $results = WhereLower::query()
-        ->whereLower('email', 'JOHN@EXAMPLE.COM')
+    $results = WhereLowercase::query()
+        ->whereLowercase('email', 'JOHN@EXAMPLE.COM')
         ->where('name', 'John')
         ->get();
 
@@ -76,8 +76,8 @@ it('can be chained with other where clauses', function () {
 });
 
 it('supports a custom operator', function () {
-    $results = DB::table('where_lower')
-        ->whereLower('email', '!=', 'JOHN@EXAMPLE.COM')
+    $results = DB::table('where_lowercase')
+        ->whereLowercase('email', '!=', 'JOHN@EXAMPLE.COM')
         ->get();
 
     expect($results)->toHaveCount(2)
@@ -85,9 +85,9 @@ it('supports a custom operator', function () {
 });
 
 it('supports the boolean argument', function () {
-    $results = DB::table('where_lower')
+    $results = DB::table('where_lowercase')
         ->where('name', 'John')
-        ->whereLower('email', '=', 'JANE@EXAMPLE.COM', 'or')
+        ->whereLowercase('email', '=', 'JANE@EXAMPLE.COM', 'or')
         ->get();
 
     expect($results)->toHaveCount(2)

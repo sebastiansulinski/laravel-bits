@@ -8,7 +8,7 @@ use LaravelBits\Macros\ArrKeysToCamel;
 use LaravelBits\Macros\ArrKeysToSnake;
 use LaravelBits\Macros\EloquentBuilderUpdateMany;
 use LaravelBits\Macros\QueryBuilderWhereDateBetween;
-use LaravelBits\Macros\QueryBuilderWhereLower;
+use LaravelBits\Macros\QueryBuilderWhereLowercase;
 
 class LaravelBitsServiceProvider extends ServiceProvider
 {
@@ -17,7 +17,7 @@ class LaravelBitsServiceProvider extends ServiceProvider
         ArrKeysToSnake::class,
         EloquentBuilderUpdateMany::class,
         QueryBuilderWhereDateBetween::class,
-        QueryBuilderWhereLower::class,
+        QueryBuilderWhereLowercase::class,
     ];
 
     /**
