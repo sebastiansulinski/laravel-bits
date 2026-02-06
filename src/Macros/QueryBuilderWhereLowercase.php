@@ -18,7 +18,7 @@ class QueryBuilderWhereLowercase
                     $value, $operator, func_num_args() === 2
                 );
 
-                return $this->where($column, $operator, strtolower($value), $boolean);
+                return $this->where($column, $operator, mb_strtolower($value), $boolean);
             });
     }
 }

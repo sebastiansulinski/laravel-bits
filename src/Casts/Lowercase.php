@@ -15,7 +15,7 @@ class Lowercase implements CastsAttributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): ?string
     {
-        return $value !== null ? strtolower($value) : null;
+        return $value !== null ? mb_strtolower($value) : null;
     }
 
     /**
@@ -23,6 +23,6 @@ class Lowercase implements CastsAttributes
      */
     public function set(Model $model, string $key, mixed $value, array $attributes): ?string
     {
-        return $value !== null ? strtolower($value) : null;
+        return $value !== null ? mb_strtolower($value) : null;
     }
 }
