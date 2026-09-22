@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-09-22
+
+### Added
+- `strict_models` configuration key in `config/laravel-bits.php`, backed by the `LARAVEL_BITS_STRICT_MODELS` environment variable, so an application can decide for itself whether Eloquent runs in strict mode
+- Documentation for the `strict_models` configuration key in README
+
+### Changed
+- `LaravelBitsServiceProvider` now reads `laravel-bits.strict_models` instead of deriving strict mode from the application environment name. The default is unchanged - strict mode stays on in every environment except `production` - so an application that does not set the key behaves exactly as before
+
 ## [1.4.0] - 2026-03-29
 
 ### Added
@@ -76,6 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation in README, CONTRIBUTING, and LICENSE files
 - MIT License
 
+[1.5.0]: https://github.com/sebastiansulinski/laravel-bits/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/sebastiansulinski/laravel-bits/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/sebastiansulinski/laravel-bits/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/sebastiansulinski/laravel-bits/compare/v1.2.0...v1.3.0

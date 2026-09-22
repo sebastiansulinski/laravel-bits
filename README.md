@@ -17,6 +17,47 @@ composer require sebastiansulinski/laravel-bits
 
 The package will automatically register its service provider.
 
+## Configuration
+
+The package ships with a configuration file, which you can publish if you need to change any of its defaults:
+
+```bash
+php artisan vendor:publish --tag=laravel-bits
+```
+
+### strict_models
+
+Controls whether the package puts Eloquent into strict mode on boot - `preventLazyLoading`,
+`preventSilentlyDiscardingAttributes` and `preventAccessingMissingAttributes`.
+
+```php
+'strict_models' => (bool) env('LARAVEL_BITS_STRICT_MODELS', env('APP_ENV', 'production') !== 'production'),
+```
+
+The default reproduces the behaviour of every earlier version: strict mode is on in every environment except
+`production`. Upgrading changes nothing unless you set the key.
+
+#### Overriding with an environment variable
+
+```dotenv
+LARAVEL_BITS_STRICT_MODELS=false
+```
+
+Values Laravel resolves to `false`, `null`, `0` or an empty string turn strict mode off. Anything else counts as
+`true`, so a malformed value fails towards strict - which is noisy rather than silently relaxing the checks.
+
+#### Overriding in the configuration file
+
+Applications with a production equivalent environment under a different name - user acceptance testing, for instance -
+should set this explicitly. Without it, that environment ends up stricter than production, which is exactly the
+divergence a production equivalent environment is meant to avoid.
+
+```php
+// config/laravel-bits.php
+
+'strict_models' => ! in_array(env('APP_ENV', 'production'), ['production', 'uat'], true),
+```
+
 ## Available Traits
 
 ### EnhancedEnums
