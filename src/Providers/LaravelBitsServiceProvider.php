@@ -2,6 +2,7 @@
 
 namespace LaravelBits\Providers;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use LaravelBits\Macros\ArrKeysToCamel;
@@ -23,7 +24,7 @@ class LaravelBitsServiceProvider extends ServiceProvider
     /**
      * Bootstrap any package services.
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function boot(): void
     {
@@ -41,7 +42,7 @@ class LaravelBitsServiceProvider extends ServiceProvider
     /**
      * Register macros.
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     private function registerMacros(): void
     {

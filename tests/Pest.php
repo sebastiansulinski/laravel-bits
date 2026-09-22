@@ -1,5 +1,7 @@
 <?php
 
+use LaravelBits\Tests\TestCase;
+
 uses(
-    LaravelBits\Tests\TestCase::class,
+    TestCase::class,
 )->in('Feature', 'Unit');

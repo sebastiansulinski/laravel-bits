@@ -3,6 +3,7 @@
 namespace LaravelBits\Utilities\Sorter;
 
 use Closure;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 class SorterPayload
@@ -12,7 +13,7 @@ class SorterPayload
     /**
      * SorterPayload constructor.
      *
-     * @param  Collection<\Illuminate\Database\Eloquent\Model>  $models
+     * @param  Collection<Model>  $models
      * @param  array<int, mixed>  $ids
      */
     public function __construct(Collection $models, array $ids, Closure|string $filter = 'id')
