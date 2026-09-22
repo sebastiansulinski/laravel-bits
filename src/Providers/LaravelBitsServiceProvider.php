@@ -34,8 +34,10 @@ class LaravelBitsServiceProvider extends ServiceProvider
 
         $this->registerMacros();
 
+        $configured = $this->app->make('config')->get('laravel-bits.strict_models');
+
         Model::shouldBeStrict(
-            (bool) $this->app->make('config')->get('laravel-bits.strict_models')
+            is_null($configured) ? ! $this->app->isProduction() : (bool) $configured
         );
     }
 

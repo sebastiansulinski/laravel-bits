@@ -31,11 +31,15 @@ Controls whether the package puts Eloquent into strict mode on boot - `preventLa
 `preventSilentlyDiscardingAttributes` and `preventAccessingMissingAttributes`.
 
 ```php
-'strict_models' => (bool) env('LARAVEL_BITS_STRICT_MODELS', env('APP_ENV', 'production') !== 'production'),
+'strict_models' => env('LARAVEL_BITS_STRICT_MODELS', null),
 ```
 
-The default reproduces the behaviour of every earlier version: strict mode is on in every environment except
-`production`. Upgrading changes nothing unless you set the key.
+Unset - which is the default - keeps the behaviour the package has always had: strict mode is on in every environment
+the application does not report as `production`. Nothing changes unless you set the key.
+
+That reading comes from the application rather than from the `APP_ENV` variable, so Artisan's `--env` flag still moves
+it exactly as it always did. Resolving the default in the configuration file instead would quietly break that, which is
+why an unset key defers the decision to boot.
 
 #### Overriding with an environment variable
 
@@ -43,8 +47,9 @@ The default reproduces the behaviour of every earlier version: strict mode is on
 LARAVEL_BITS_STRICT_MODELS=false
 ```
 
-Values Laravel resolves to `false`, `null`, `0` or an empty string turn strict mode off. Anything else counts as
-`true`, so a malformed value fails towards strict - which is noisy rather than silently relaxing the checks.
+Values Laravel resolves to `false`, `0` or an empty string turn strict mode off, and anything else counts as `true`, so
+a malformed value fails towards strict rather than silently relaxing the checks. `null` is the exception: it reads as
+unset, and the package goes back to deciding at boot.
 
 #### Overriding in the configuration file
 
@@ -56,6 +61,20 @@ divergence a production equivalent environment is meant to avoid.
 // config/laravel-bits.php
 
 'strict_models' => ! in_array(env('APP_ENV', 'production'), ['production', 'uat'], true),
+```
+
+Configuration files are loaded before the application resolves its own environment, so an expression written there
+reads the `APP_ENV` variable and will not follow `--env`. Where that matters, set the key from a service provider
+instead - every `register` method runs before this package boots:
+
+```php
+public function register(): void
+{
+    config()->set(
+        'laravel-bits.strict_models',
+        ! in_array($this->app->environment(), ['production', 'uat'], true)
+    );
+}
 ```
 
 ## Available Traits

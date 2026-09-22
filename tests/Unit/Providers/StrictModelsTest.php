@@ -60,6 +60,23 @@ function withEnvironment(array $environment, Closure $callback): mixed
 }
 
 /**
+ * Run the callback with the application reporting the given environment,
+ * which is how Artisan's --env flag reaches the container at runtime.
+ */
+function withApplicationEnvironment(string $environment, Closure $callback): void
+{
+    $original = app()->environment();
+
+    try {
+        app()->instance('env', $environment);
+
+        $callback();
+    } finally {
+        app()->instance('env', $original);
+    }
+}
+
+/**
  * Evaluate the packaged configuration file under the given environment.
  *
  * @param  array<string, string|null>  $environment
@@ -81,6 +98,14 @@ function registerPackage(): void
     app()->register(LaravelBitsServiceProvider::class, force: true);
 }
 
+/**
+ * Forget any configured value, so the packaged default is merged back in.
+ */
+function forgetPackageConfiguration(): void
+{
+    config()->set('laravel-bits', []);
+}
+
 $strictModelState = null;
 
 beforeEach(function () use (&$strictModelState) {
@@ -99,109 +124,135 @@ afterEach(function () use (&$strictModelState) {
     Model::preventAccessingMissingAttributes($missing);
 });
 
-it('derives the default from the application environment', function (?string $environment, bool $expected) {
+it('leaves the key unset whatever the environment is named', function (string $environment) {
 
-    expect(packageConfiguration([
+    $configuration = packageConfiguration([
         'APP_ENV' => $environment,
         'LARAVEL_BITS_STRICT_MODELS' => null,
-    ]))->toHaveKey('strict_models', $expected);
+    ]);
+
+    expect($configuration)->toHaveKey('strict_models')
+        ->and($configuration['strict_models'])->toBeNull();
+
+})->with([
+    'production' => ['production'],
+    'local' => ['local'],
+    'user acceptance testing' => ['uat'],
+]);
+
+it('passes the environment variable through to the key', function (string $override, bool $expected) {
+
+    expect(packageConfiguration([
+        'APP_ENV' => 'local',
+        'LARAVEL_BITS_STRICT_MODELS' => $override,
+    ])['strict_models'])->toBe($expected);
+
+})->with([
+    'false' => ['false', false],
+    'true' => ['true', true],
+]);
+
+it('follows the application environment when the key is not set', function (string $environment, bool $expected) {
+
+    forgetPackageConfiguration();
+
+    Model::shouldBeStrict(! $expected);
+
+    withApplicationEnvironment($environment, fn () => registerPackage());
+
+    expect(Model::preventsLazyLoading())->toBe($expected)
+        ->and(Model::preventsSilentlyDiscardingAttributes())->toBe($expected)
+        ->and(Model::preventsAccessingMissingAttributes())->toBe($expected);
 
 })->with([
     'production is not strict' => ['production', false],
     'local is strict' => ['local', true],
-    'staging is strict' => ['staging', true],
     'user acceptance testing is strict' => ['uat', true],
-    'an absent environment falls back to production' => [null, false],
 ]);
 
-it('lets the environment variable override the default', function (?string $environment, string $override, bool $expected) {
+it('follows the application environment rather than the APP_ENV variable', function (
+    string $applicationEnvironment,
+    string $variable,
+    bool $expected
+) {
 
-    expect(packageConfiguration([
-        'APP_ENV' => $environment,
-        'LARAVEL_BITS_STRICT_MODELS' => $override,
-    ]))->toHaveKey('strict_models', $expected);
+    forgetPackageConfiguration();
+
+    Model::shouldBeStrict(! $expected);
+
+    withEnvironment([
+        'APP_ENV' => $variable,
+        'LARAVEL_BITS_STRICT_MODELS' => null,
+    ], fn () => withApplicationEnvironment($applicationEnvironment, fn () => registerPackage()));
+
+    expect(Model::preventsLazyLoading())->toBe($expected)
+        ->and(Model::preventsSilentlyDiscardingAttributes())->toBe($expected)
+        ->and(Model::preventsAccessingMissingAttributes())->toBe($expected);
 
 })->with([
-    'disabled outside production' => ['local', 'false', false],
-    'disabled outside production with zero' => ['local', '0', false],
-    'enabled in production' => ['production', 'true', true],
-    'enabled in production with one' => ['production', '1', true],
-    'an unrecognised value fails towards strict' => ['production', 'definitely', true],
+    'an --env override away from production is strict' => ['local', 'production', true],
+    'an --env override onto production is not strict' => ['production', 'local', false],
 ]);
 
-it('enables strict models when the configuration is enabled', function () {
+it('defers to the application environment when the variable resolves to null', function () {
 
-    config()->set('laravel-bits.strict_models', true);
-
-    Model::shouldBeStrict(false);
-
-    registerPackage();
-
-    expect(Model::preventsLazyLoading())->toBeTrue()
-        ->and(Model::preventsSilentlyDiscardingAttributes())->toBeTrue()
-        ->and(Model::preventsAccessingMissingAttributes())->toBeTrue();
-});
-
-it('disables strict models when the configuration is disabled', function () {
-
-    config()->set('laravel-bits.strict_models', false);
+    forgetPackageConfiguration();
 
     Model::shouldBeStrict(true);
 
-    registerPackage();
+    withEnvironment([
+        'LARAVEL_BITS_STRICT_MODELS' => 'null',
+    ], fn () => withApplicationEnvironment('production', fn () => registerPackage()));
 
     expect(Model::preventsLazyLoading())->toBeFalse()
         ->and(Model::preventsSilentlyDiscardingAttributes())->toBeFalse()
         ->and(Model::preventsAccessingMissingAttributes())->toBeFalse();
 });
 
-it('honours the configuration over an environment pointing the other way', function () {
+it('casts an explicit environment variable value', function (string $override, bool $expected) {
+
+    forgetPackageConfiguration();
+
+    Model::shouldBeStrict(! $expected);
+
+    withEnvironment([
+        'LARAVEL_BITS_STRICT_MODELS' => $override,
+    ], fn () => registerPackage());
+
+    expect(Model::preventsLazyLoading())->toBe($expected)
+        ->and(Model::preventsSilentlyDiscardingAttributes())->toBe($expected)
+        ->and(Model::preventsAccessingMissingAttributes())->toBe($expected);
+
+})->with([
+    'false disables' => ['false', false],
+    'zero disables' => ['0', false],
+    'true enables' => ['true', true],
+    'one enables' => ['1', true],
+    'an unrecognised value fails towards strict' => ['definitely', true],
+]);
+
+it('honours an explicit true where the environment alone would not', function () {
+
+    config()->set('laravel-bits.strict_models', true);
 
     Model::shouldBeStrict(false);
 
-    withEnvironment([
-        'APP_ENV' => 'production',
-        'LARAVEL_BITS_STRICT_MODELS' => null,
-    ], function () {
-        config()->set('laravel-bits.strict_models', true);
-
-        registerPackage();
-    });
+    withApplicationEnvironment('production', fn () => registerPackage());
 
     expect(Model::preventsLazyLoading())->toBeTrue()
         ->and(Model::preventsSilentlyDiscardingAttributes())->toBeTrue()
         ->and(Model::preventsAccessingMissingAttributes())->toBeTrue();
 });
 
-it('falls back to the packaged default when the application provides no value', function () {
+it('honours an explicit false where the environment alone would not', function () {
 
-    config()->set('laravel-bits', []);
-
-    Model::shouldBeStrict(false);
-
-    registerPackage();
-
-    expect(config('laravel-bits.strict_models'))->toBeTrue()
-        ->and(Model::preventsLazyLoading())->toBeTrue()
-        ->and(Model::preventsSilentlyDiscardingAttributes())->toBeTrue()
-        ->and(Model::preventsAccessingMissingAttributes())->toBeTrue();
-});
-
-it('applies the packaged default without strict models in production', function () {
+    config()->set('laravel-bits.strict_models', false);
 
     Model::shouldBeStrict(true);
 
-    withEnvironment([
-        'APP_ENV' => 'production',
-        'LARAVEL_BITS_STRICT_MODELS' => null,
-    ], function () {
-        config()->set('laravel-bits', []);
+    withApplicationEnvironment('local', fn () => registerPackage());
 
-        registerPackage();
-    });
-
-    expect(config('laravel-bits.strict_models'))->toBeFalse()
-        ->and(Model::preventsLazyLoading())->toBeFalse()
+    expect(Model::preventsLazyLoading())->toBeFalse()
         ->and(Model::preventsSilentlyDiscardingAttributes())->toBeFalse()
         ->and(Model::preventsAccessingMissingAttributes())->toBeFalse();
 });
