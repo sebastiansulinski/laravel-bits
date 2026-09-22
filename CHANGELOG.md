@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.3] - 2026-09-22
+
+### Fixed
+- `strict_models` now defaults to unset, with the service provider falling back to the runtime environment check it used before v1.5.0. The v1.5.0 default resolved the value from the `APP_ENV` variable in the configuration file, which is not equivalent: `Application::isProduction()` reads the environment the container resolved, so Artisan's `--env` flag moves it while the variable does not. An application that does not set the key now keeps its previous behaviour under `--env` as well
+
+### Changed
+- The service provider, rather than the configuration file, casts an explicit `strict_models` value, so that an unset key stays distinguishable from `false`
+
 ## [1.5.2] - 2026-09-22
 
 ### Changed
@@ -97,6 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation in README, CONTRIBUTING, and LICENSE files
 - MIT License
 
+[1.5.3]: https://github.com/sebastiansulinski/laravel-bits/compare/v1.5.2...v1.5.3
 [1.5.2]: https://github.com/sebastiansulinski/laravel-bits/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/sebastiansulinski/laravel-bits/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/sebastiansulinski/laravel-bits/compare/v1.4.0...v1.5.0
