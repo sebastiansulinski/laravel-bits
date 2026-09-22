@@ -5,7 +5,7 @@ A set of handy utilities for any Laravel project.
 ## Requirements
 
 - PHP ^8.4
-- Laravel ^12.0
+- Laravel ^12.0 || ^13.0
 
 ## Installation
 

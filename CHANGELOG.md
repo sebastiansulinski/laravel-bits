@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-09-22
+
+### Fixed
+- `composer lint` now names the paths to analyse, so it runs the static analysis instead of exiting with "At least one path must be specified to analyse"
+- Requirements in README now state Laravel `^12.0 || ^13.0`, matching `composer.json` since v1.4.0
+
 ## [1.5.0] - 2026-09-22
 
 ### Added
@@ -85,6 +91,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation in README, CONTRIBUTING, and LICENSE files
 - MIT License
 
+[1.5.1]: https://github.com/sebastiansulinski/laravel-bits/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/sebastiansulinski/laravel-bits/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/sebastiansulinski/laravel-bits/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/sebastiansulinski/laravel-bits/compare/v1.3.0...v1.3.1
